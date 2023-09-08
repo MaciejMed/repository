@@ -10,6 +10,7 @@ from random import choices
 import linecache
 from typing import List
 import math
+from riotwatcher import LolWatcher
 import requests
 
 
@@ -17,7 +18,6 @@ supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 linecache.clearcache()
 @bot.event
-
 async def on_ready():
     print("bot gud")
     try:
@@ -534,32 +534,35 @@ async def createcharacter(
 @bot.tree.command(name="karta", description="Wyświetla kartę postaci wybranego użytkownika")
 @app_commands.describe(gracz="Gracz, którego kartę postaci chcesz zobaczyć (@gracz), zostaw puste jeśli chcesz zobaczyć swoją")
 async def karta(interaction: discord.Integration, gracz: str=None):
-    if gracz == None:
-        gracz=interaction.user.mention
-    file_name=gracz[2:-1]
-    f=open(f"{file_name}.txt","r")
-    emb_title=f.readline()
-    emb_desc=f.readline()
-    emb_img=f.readline()
-    emb_str=f.readline()
-    emb_dex=f.readline()
-    emb_con=f.readline()
-    emb_int=f.readline()
-    emb_wis=f.readline()
-    emb_cha=f.readline()
-    emb_notes=f.readline()
-    f.close()
+    try:
+        if gracz == None:
+            gracz=interaction.user.mention
+        file_name=gracz[2:-1]
+        f=open(f"{file_name}.txt","r")
+        emb_title=f.readline()
+        emb_desc=f.readline()
+        emb_img=f.readline()
+        emb_str=f.readline()
+        emb_dex=f.readline()
+        emb_con=f.readline()
+        emb_int=f.readline()
+        emb_wis=f.readline()
+        emb_cha=f.readline()
+        emb_notes=f.readline()
+        f.close()
 
-    embed=discord.Embed(title=emb_title[0:-1], description=emb_desc)
-    embed.set_image(url=emb_img)
-    embed.add_field(name="Strength", value=emb_str, inline=True)
-    embed.add_field(name="Dexterity", value=emb_dex, inline=True)
-    embed.add_field(name="Constitution", value=emb_con, inline=True)
-    embed.add_field(name="Intelligence", value=emb_int, inline=True)
-    embed.add_field(name="Wisdom", value=emb_wis, inline=True)
-    embed.add_field(name="Charisma", value=emb_cha, inline=True)
-    embed.add_field(name="Notatki", value=emb_notes, inline=False)
-    await interaction.response.send_message(embed=embed)
+        embed=discord.Embed(title=emb_title[0:-1], description=emb_desc)
+        embed.set_image(url=emb_img)
+        embed.add_field(name="Strength", value=emb_str, inline=True)
+        embed.add_field(name="Dexterity", value=emb_dex, inline=True)
+        embed.add_field(name="Constitution", value=emb_con, inline=True)
+        embed.add_field(name="Intelligence", value=emb_int, inline=True)
+        embed.add_field(name="Wisdom", value=emb_wis, inline=True)
+        embed.add_field(name="Charisma", value=emb_cha, inline=True)
+        embed.add_field(name="Notatki", value=emb_notes, inline=False)
+        await interaction.response.send_message(embed=embed)
+    except FileNotFoundError:
+        await interaction.response.send_message(f"Użytkonik nie posiada karty postaci")
 
 @bot.tree.command(name="modkarty", description="Modyfikuje wybrany element Twojej karty postaci")
 @app_commands.describe(element="Który element swojej karty chcesz zmienić", wartosc="Nowa wartość, która ma zostać przypisana")
@@ -692,27 +695,30 @@ async def przedmiot(interaction: discord.Integration, przedmiot: app_commands.Ch
 @bot.tree.command(name="pokazeq", description="Wyświetla ekwipunek wybranego użytkownika")
 @app_commands.describe(gracz="Gracz, którego ekwipunek chcesz zobaczyć (@gracz), zostaw puste jeśli chcesz zobaczyć swój")
 async def pokazeq(interaction: discord.Integration, gracz: str=None):
-    embed=discord.Embed(title=f"Ekwipunek gracza {interaction.user}")
-    if gracz == None:
-        gracz=interaction.user.mention
-    file_name=gracz[2:-1]
-    f=open(f"ekw_{file_name}.txt","r")
-    count=0
-    while True:
-        count += 1
-        line = f.readline()
-        if not line:
-            break
-        if line.strip("\n")=="miecz":
-            embed.add_field(name=":crossed_swords: Miecz", value="", inline=False)
-        elif line.strip("\n")=="tarcza":
-            embed.add_field(name=":shield: Tarcza", value="", inline=False)
-        elif line.strip("\n")=="wykrywacz":
-            embed.add_field(name=":satellite: Tunelowy wykrywacz zakłóceń fal grawitacyjnych", value="", inline=False)
-        elif line.strip("\n")=="cztery":
-            embed.add_field(name=":four: Przedmiot czwarty", value="", inline=False)
+    try:
+        embed=discord.Embed(title=f"Ekwipunek gracza {interaction.user}")
+        if gracz == None:
+            gracz=interaction.user.mention
+        file_name=gracz[2:-1]
+        f=open(f"ekw_{file_name}.txt","r")
+        count=0
+        while True:
+            count += 1
+            line = f.readline()
+            if not line:
+                break
+            if line.strip("\n")=="miecz":
+                embed.add_field(name=":crossed_swords: Miecz", value="", inline=False)
+            elif line.strip("\n")=="tarcza":
+                embed.add_field(name=":shield: Tarcza", value="", inline=False)
+            elif line.strip("\n")=="wykrywacz":
+                embed.add_field(name=":satellite: Tunelowy wykrywacz zakłóceń fal grawitacyjnych", value="", inline=False)
+            elif line.strip("\n")=="cztery":
+                embed.add_field(name=":four: Przedmiot czwarty", value="", inline=False)
 
-    await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed)
+    except FileNotFoundError:
+        await interaction.response.send_message(f"Użytkownik nie posiada ekwipunku")
 
 
 
@@ -746,6 +752,46 @@ async def pomnoz(interaction: discord.Integration, czynnik_1: float, czynnik_2: 
     res = czynnik_1 * czynnik_2
     await interaction.response.send_message(f"{czynnik_1} • {czynnik_2} = {res}")
 
+
+RIOT_API_KEY = 'RGAPI-30e37ca4-b13f-45a6-a663-49172d6201de'
+
+lol_watcher = LolWatcher(RIOT_API_KEY)
+
+ITEMS_API_URL = 'https://na1.api.riotgames.com/lol/static-data/v4/items'
+
+def get_item_info(item_id):
+    headers = {
+        'X-Riot-Token': RIOT_API_KEY
+    }
+    params = {
+        'itemListData': 'from'
+    }
+    response = requests.get(f'{ITEMS_API_URL}/{item_id}', headers=headers, params=params)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+@bot.tree.command(name="runy")
+async def runy(interaction: discord.Integration, champion_name:str):
+    try:
+        champion_data = lol_watcher.data_dragon.champions('en_US')
+        champion_id = None
+        for champion_key, champion_info in champion_data['data'].items():
+            if champion_info['name'].lower() == champion_name.lower():
+                champion_id = champion_key
+                break
+
+        if champion_id:
+            runes = lol_watcher.champion.runes(champion_id)
+            await interaction.response.send_message(f'Runy dla {champion_name}:\n{runes}')
+        else:
+            await interaction.response.send_message('Zła nazwa postaci')
+
+    except Exception as e:
+        print(e)
+        await interaction.response.send_message('Wystąpił błąd podczas pobierania danych.')
 
 
 bot.run(TOKEN)
