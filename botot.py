@@ -10,10 +10,11 @@ from random import choices
 import linecache
 from typing import List
 import math
+from riotwatcher import LolWatcher
+import requests
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 linecache.clearcache()
 @bot.event
-
 async def on_ready():
     print("bot gud")
     try:
@@ -693,6 +694,46 @@ async def pomnoz(interaction: discord.Integration, czynnik_1: float, czynnik_2: 
     res = czynnik_1 * czynnik_2
     await interaction.response.send_message(f"{czynnik_1} • {czynnik_2} = {res}")
 
+
+RIOT_API_KEY = 'RGAPI-30e37ca4-b13f-45a6-a663-49172d6201de'
+
+lol_watcher = LolWatcher(RIOT_API_KEY)
+
+ITEMS_API_URL = 'https://na1.api.riotgames.com/lol/static-data/v4/items'
+
+def get_item_info(item_id):
+    headers = {
+        'X-Riot-Token': RIOT_API_KEY
+    }
+    params = {
+        'itemListData': 'from'
+    }
+    response = requests.get(f'{ITEMS_API_URL}/{item_id}', headers=headers, params=params)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+@bot.tree.command(name="runy")
+async def runy(interaction: discord.Integration, champion_name:str):
+    try:
+        champion_data = lol_watcher.data_dragon.champions('en_US')
+        champion_id = None
+        for champion_key, champion_info in champion_data['data'].items():
+            if champion_info['name'].lower() == champion_name.lower():
+                champion_id = champion_key
+                break
+
+        if champion_id:
+            runes = lol_watcher.champion.runes(champion_id)
+            await interaction.response.send_message(f'Runy dla {champion_name}:\n{runes}')
+        else:
+            await interaction.response.send_message('Zła nazwa postaci')
+
+    except Exception as e:
+        print(e)
+        await interaction.response.send_message('Wystąpił błąd podczas pobierania danych.')
 
 
 bot.run(TOKEN)
