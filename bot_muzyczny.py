@@ -1,13 +1,13 @@
 #importowanie bibliotek
-import discord
-import os
 import asyncio
+
+import discord
+from discord.ext import commands
 import youtube_dl
 
-client = commands.Bot(command_prefix='!', help_command=None)
 
 #połączenie z botem
-
+client = commands.Bot(command_prefix='?')
 
 #dodawania opcji otwarzania z paczki yt_dl
 yt_dl_opts = {'format': 'bestaudio/best'}
@@ -17,7 +17,7 @@ yt_dl_opts = {'format': 'bestaudio/best'}
 ytdl = youtube_dl.YouttubeDL(yt_dl_opts)
 
 #ffmpeg to paczka z rzeczami potrzebnymi do działania audio filmów z youtuba 
-#komenda poniżej srawia że nasz bot nie włącza filmo, a jedynie jego audio
+#komenda poniżej sprawia że nasz bot nie włącza filmo, a jedynie audio
 ffmpeg_options = {'options':"-vn"}
 
 
@@ -31,17 +31,14 @@ async def on_ready():
 #po wysłaniu wiadomości
 @client.event
 async def on_massage(msg):
-    if msg.content>startwish("?play"):
-
+    voice_clients = {}
+    if msg.content.startwish("?play"):
 
         try:                                  #największy problem jaki miałem jeśli dwa razy wpisało się play to bot się bugował 
             voice_client = await msg.author.voice.channel.connect()
             voice_clients[voice_client.guild.id] = voice_client
-        except:
-            print('error')
-
-
-
+        except Exception as err:
+            print(f'error: {err}')
 
 
         try:
@@ -78,21 +75,21 @@ async def on_massage(msg):
 
             #wznawianie zapauzowanego filmu
         if msg.content.startswith("?resume"):
-        try:
-            voice_client[msg.guild.id].resume()
-        except Exception as err:
-            print(err)
+            try:
+                voice_client[msg.guild.id].resume()
+            except Exception as err:
+                print(err)
 
 
             #zatrzymywanie bota
 
 
-            if msg.content.startswith("?stop"):
-        try:
-            voice_client[msg.guild.id].stop()
-            await voice_clients[msg.guild.id].disconnect()
-        except Exception as err:
-            print(err)
+        if msg.content.startswith("?stop"):
+            try:
+                voice_client[msg.guild.id].stop()
+                await voice_clients[msg.guild.id].disconnect()
+            except Exception as err:
+                print(err)
 
 
 
