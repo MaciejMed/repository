@@ -40,28 +40,28 @@ async def mathadd(ctx, x: float, y: float ):
     await ctx.send(res)
 
 
-@client.commamd()
+@client.command()
 async def mathsub(ctx, x: float, y: float ):
     res = sub(x, y)
     await ctx.send(res)
 
 
-@client.commamd()
+@client.command()
 async def mathadd(ctx, x: float, y: float ):
     res = add(x, y)
     await ctx.send(res)
 
-@client.commamd()
+@client.command()
 async def mathdiv(ctx, x: float, y: float ):
     res = div(x, y)
     await ctx.send(res)
 
-@client.commamd()
+@client.command()
 async def mathrandom(ctx, x: float, y: float ):
     res = rando(x, y)
     await ctx.send(res)
 
-@client.commamd()
+@client.command()
 async def mathsqrt(ctx, x: float, y: float ):
     res = sqrt(x)
     await ctx.send(res)
