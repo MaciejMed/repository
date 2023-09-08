@@ -9,6 +9,10 @@ import youtube_dl
 #połączenie z botem
 client = commands.Bot(command_prefix='?')
 
+
+
+
+
 #dodawania opcji otwarzania z paczki yt_dl
 yt_dl_opts = {'format': 'bestaudio/best'}
 

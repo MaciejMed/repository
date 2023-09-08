@@ -10,6 +10,10 @@ from random import choices
 import linecache
 from typing import List
 import math
+import requests
+
+
+supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 linecache.clearcache()
 @bot.event
@@ -32,9 +36,58 @@ async def help(interaction:discord.Integration):
     embed.add_field(name="Karty postaci", value="**/createcharacter** - Tworzy kartę postaci\n **/karta** - Wyświetla kartę postaci wybranego użytkownika\n **/modkarty** - Modyfikuje wybrany element karty", inline=False)
     embed.add_field(name="Ekwipunek", value="**/pokazeq** - Pokazuje ekwipunek wybranego gracza\n **/modyfikujeq** - Modyfikuje ekwipunek\n **/przedmiot** - Pokazuje informacje o wybranym przedmiocie", inline=False)
     embed.add_field(name="Kalkulator", value="**/dodaj** - Dodaje do siebie dwie liczby\n **/odejmij** - Odejmuje jedną liczbę od drugiej\n **/pomnoz** - Mnoży przez siebie dwie liczby\n **/podziel** - Dzieli jedną liczbę przez drugą\n **/pierwiastek** - Pierwiastkuje podaną liczbę", inline=False)
+    # dopisać kursy walut
     
     await interaction.response.send_message(embed=embed)
 
+
+@bot.tree.command(name="waluta", description="Sprawdź kurs")
+@app_commands.describe(curr_code="Kod waluty np. USD, GBP", quantity="kwota w złotówkach do wymiany")
+async def currency(interaction:discord.Integration, curr_code: str, quantity: float):
+    curr_code = curr_code.upper()
+    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/today/"
+    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/2012-01-01/2012-01-31/?format=json"
+
+    if curr_code not in supported:
+        await interaction.response.send_message(f"waluta {curr_code} nie jest obsługiwana wybierz jedną z {', '.join(supported)}")
+        return
+    res = requests.get(url)
+    print(res.json())
+    table = res.json()
+
+    result = quantity * table.get("rates")[0].get("mid")
+    await interaction.response.send_message(f"{quantity}zł to jest {result} {curr_code.upper()}")
+
+@bot.tree.command(name="zamiana", description="Zamień dowolną kwote z danej waluty na inną.")
+@app_commands.describe(
+        curr_from ="Kod waluty np. USD, GBP, z której zmieniamy",
+        curr_to="Kod waluty np. USD, GBP, na którą zmieniamy ",
+        num="kwota"
+    )
+async def currency(interaction:discord.Integration, curr_from:str, num:float, curr_to:str ):
+    curr_from = curr_from.upper()
+    curr_to = curr_to.upper()
+
+    url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/today/"
+    url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/2012-01-01/2012-01-31/?format=json"
+
+    url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/today/"
+    url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/2012-01-01/2012-01-31/?format=json"
+
+
+
+    if curr_from not in supported or curr_to not in supported: 
+        await interaction.response.send_message(f"waluta nie jest obsługiwana wybierz jedną z {', '.join(supported)}")
+        return
+    res1 = requests.get(url1)
+    res2 = requests.get(url2)
+    table1 = res1.json()
+    table2 = res2.json()
+    curr1 = table1.get("rates")[0].get("mid") # 5 EUR
+    curr2 = table2.get("rates")[0].get("mid") # 3 USD
+                                        # num = 10
+    result = curr1 * num / curr2
+    await interaction.response.send_message(f"{num:.2f} {curr_from} = {result:.2f} {curr_to}")
 
 @bot.tree.command(name="hello", description="Wita się z użytkownikiem")
 async def hello(interaction: discord.Integration):

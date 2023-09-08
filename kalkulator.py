@@ -27,7 +27,7 @@ def sqrt(x: float):
 
 ##wszystkie funkcje
 
-
+#sda
 @client.event
 async def on_ready():
     print(f'{client.user} is online')
