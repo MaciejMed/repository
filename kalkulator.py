@@ -1,6 +1,8 @@
 import math
-from discord.ext import commands
+import random
+
 import discord
+from discord.ext import commands
 
 client = commands.Bot(command_prefix='!', help_command=None)
 
@@ -28,44 +30,39 @@ def sqrt(x: float):
 
 @client.event
 async def on_ready():
-    print(f'{bot.user.name} is online')
-
-
+    print(f'{client.user} is online')
 
 
 ##komendy
 @client.command()
 async def mathadd(ctx, x: float, y: float ):
-    res = add(x,y) #użycie komendy add
+    res = add(x,y) #użycie funkcn add
     await ctx.send(res)
 
 
 @client.commamd()
-async  def mathsub(ctx, x: float, y: float ):
+async def mathsub(ctx, x: float, y: float ):
     res = sub(x, y)
     await ctx.send(res)
 
 
 @client.commamd()
-async  def mathadd(ctx, x: float, y: float ):
+async def mathadd(ctx, x: float, y: float ):
     res = add(x, y)
     await ctx.send(res)
 
 @client.commamd()
-async  def mathdiv(ctx, x: float, y: float ):
+async def mathdiv(ctx, x: float, y: float ):
     res = div(x, y)
     await ctx.send(res)
 
-
-
 @client.commamd()
-async  def mathrandom(ctx, x: float, y: float ):
+async def mathrandom(ctx, x: float, y: float ):
     res = rando(x, y)
     await ctx.send(res)
 
-
 @client.commamd()
-async  def mathsqrt(ctx, x: float, y: float ):
+async def mathsqrt(ctx, x: float, y: float ):
     res = sqrt(x)
     await ctx.send(res)
 
@@ -73,6 +70,3 @@ async  def mathsqrt(ctx, x: float, y: float ):
 ##wszystkie komendy
 
 client.run ('')
-
-
-
