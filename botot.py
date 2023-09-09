@@ -36,7 +36,8 @@ async def help(interaction:discord.Integration):
     embed.add_field(name="Karty postaci", value="**/createcharacter** - Tworzy kartę postaci\n **/karta** - Wyświetla kartę postaci wybranego użytkownika\n **/modkarty** - Modyfikuje wybrany element karty", inline=False)
     embed.add_field(name="Ekwipunek", value="**/pokazeq** - Pokazuje ekwipunek wybranego gracza\n **/modyfikujeq** - Modyfikuje ekwipunek\n **/przedmiot** - Pokazuje informacje o wybranym przedmiocie", inline=False)
     embed.add_field(name="Kalkulator", value="**/dodaj** - Dodaje do siebie dwie liczby\n **/odejmij** - Odejmuje jedną liczbę od drugiej\n **/pomnoz** - Mnoży przez siebie dwie liczby\n **/podziel** - Dzieli jedną liczbę przez drugą\n **/pierwiastek** - Pierwiastkuje podaną liczbę", inline=False)
-    # dopisać kursy walut
+    embed.add_field(name="Waluty", value="**/waluta** - Sprawdza obecny kurs wybranej waluty\n **/zamiana** - Zamienia wybraną walutę na dowolną inną", inline=False)
+    
     
     await interaction.response.send_message(embed=embed)
 
@@ -49,16 +50,16 @@ async def currency(interaction:discord.Integration, curr_code: str, quantity: fl
     url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/2012-01-01/2012-01-31/?format=json"
 
     if curr_code not in supported:
-        await interaction.response.send_message(f"waluta {curr_code} nie jest obsługiwana wybierz jedną z {', '.join(supported)}")
+        await interaction.response.send_message(f"Waluta {curr_code} nie jest obsługiwana. Wybierz jedną z {', '.join(supported)}")
         return
     res = requests.get(url)
     print(res.json())
     table = res.json()
 
     result = quantity * table.get("rates")[0].get("mid")
-    await interaction.response.send_message(f"{quantity}zł to jest {result} {curr_code.upper()}")
+    await interaction.response.send_message(f"{quantity} zł to jest {result} {curr_code.upper()}")
 
-@bot.tree.command(name="zamiana", description="Zamień dowolną kwote z danej waluty na inną.")
+@bot.tree.command(name="zamiana", description="Zamień dowolną kwotę z wybranej waluty na inną.")
 @app_commands.describe(
         curr_from ="Kod waluty np. USD, GBP, z której zmieniamy",
         curr_to="Kod waluty np. USD, GBP, na którą zmieniamy ",
