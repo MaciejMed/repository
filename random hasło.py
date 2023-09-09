@@ -19,5 +19,9 @@ async def generujhaslo(ctx, dlugosc=12):
 
     haslo = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=dlugosc))
     await ctx.send(f'Oto wygenerowane hasło: `{haslo}`')
+    
+@bot.event
+async def on_command(ctx):
+    await ctx.message.delete()
 
 bot.run(TOKEN)
