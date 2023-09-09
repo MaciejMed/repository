@@ -11,10 +11,11 @@ import linecache
 from typing import List
 import math
 import requests
+import string
+bot = commands.Bot(command_prefix="/", intents=discord.Intents.all())
 
-
+tymczasowe_ankiety = {}
 supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 linecache.clearcache()
 @bot.event
 async def on_ready():
@@ -28,7 +29,7 @@ async def on_ready():
 @bot.tree.command(name="help", description="Podaje listę komend")
 async def help(interaction:discord.Integration):
     embed=discord.Embed(title="Lista komend", color=0x009999)
-    embed.add_field(name="Różne", value="**/hello** - Wita się z użytkownikiem", inline=False)
+    embed.add_field(name="Różne", value="**/hello** - Wita się z użytkownikiem\n **/generujhaslo** - Generuje bezpieczne hasło z losowych znaków", inline=False)
     embed.add_field(name="Kostki", value="**/kostka** - Prosty rzut kostką\n **/rzutpro** - Rzuca kostką z dodatkowymi funkcjami", inline=False)
     embed.add_field(name="Generacja", value="**/dungeon** - Generuje loch z emotikon\n **/customdung** - Generuje loch z wybranych emotikon\n **/presetdung** - Generuje loch z wybranego zestawu emotikon\n **/roadgen** - Generuje dróżkę z emotikon", inline=False)
     embed.add_field(name="Losowanie imion", value="**/namegen** - Generuje losowe imię z wybranej listy\n **/addname** - Dodaje imię do listy\n **/remname** - Usuwa imię z listy\n **/namelist** - Wyświetla wszystkie imiona z wybranej listy", inline=False)
@@ -39,6 +40,19 @@ async def help(interaction:discord.Integration):
     
     
     await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="generujhaslo", description="Generuje bezpieczne hasło specjalnie dla Ciebie")
+@app_commands.describe(dlugosc="Długość hasła, domyślna wartość to 12")
+async def generujhaslo(interaction:discord.Integration, dlugosc:int=12):
+    if dlugosc < 8:
+        await interaction.response.send_message(f'Długość hasła musi wynosić co najmniej 8 znaków.', ephemeral=True)
+        return
+
+    haslo = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=dlugosc))
+    await interaction.response.send_message(f'Oto wygenerowane hasło: `{haslo}`', ephemeral=True)
+
+
 
 #supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
 
