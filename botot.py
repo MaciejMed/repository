@@ -40,11 +40,40 @@ async def help(interaction:discord.Integration):
     
     await interaction.response.send_message(embed=embed)
 
+#supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
 
 @bot.tree.command(name="waluta", description="Sprawdź kurs")
 @app_commands.describe(curr_code="Kod waluty np. USD, GBP", quantity="kwota w złotówkach do wymiany")
-async def currency(interaction:discord.Integration, curr_code: str, quantity: float):
-    curr_code = curr_code.upper()
+@app_commands.choices(curr_code=[
+    app_commands.Choice(name="USD", value="usd"),
+    app_commands.Choice(name="EUR", value="eur"),
+    app_commands.Choice(name="HKD", value="hkd"),
+    app_commands.Choice(name="CAD", value="cad"),
+    app_commands.Choice(name="NZD", value="nzd"),
+    app_commands.Choice(name="SGD", value="sgd"),
+    app_commands.Choice(name="AUD", value="aud"),
+    app_commands.Choice(name="CHF", value="chf"),
+    app_commands.Choice(name="GBP", value="gbp"),
+    app_commands.Choice(name="UAH", value="uah"),
+    app_commands.Choice(name="CZK", value="czk"),
+    app_commands.Choice(name="DKK", value="dkk"),
+    app_commands.Choice(name="NOK", value="nok"),
+    app_commands.Choice(name="SEK", value="sek"),
+    app_commands.Choice(name="RON", value="ron"),
+    app_commands.Choice(name="BGN", value="bgn"),
+    app_commands.Choice(name="TRY", value="try"),
+    app_commands.Choice(name="ILS", value="ils"),
+    app_commands.Choice(name="PHP", value="php"),
+    app_commands.Choice(name="MXN", value="mxn"),
+    app_commands.Choice(name="ZAR", value="zar"),
+    app_commands.Choice(name="BRL", value="brl"),
+    app_commands.Choice(name="MYR", value="myr"),
+    app_commands.Choice(name="CNY", value="cny"),
+    app_commands.Choice(name="XDR", value="xdr"),
+    
+])
+async def waluta(interaction:discord.Integration, curr_code: app_commands.Choice[str], quantity: float):
+    curr_code = curr_code.value.upper()
     url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/today/"
     url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/2012-01-01/2012-01-31/?format=json"
 
@@ -52,11 +81,10 @@ async def currency(interaction:discord.Integration, curr_code: str, quantity: fl
         await interaction.response.send_message(f"Waluta {curr_code} nie jest obsługiwana. Wybierz jedną z {', '.join(supported)}")
         return
     res = requests.get(url)
-    print(res.json())
     table = res.json()
 
     result = quantity * table.get("rates")[0].get("mid")
-    await interaction.response.send_message(f"{quantity} zł to jest {result} {curr_code.upper()}")
+    await interaction.response.send_message(f"{quantity} PLN to {result} {curr_code.upper()}")
 
 @bot.tree.command(name="zamiana", description="Zamień dowolną kwotę z wybranej waluty na inną.")
 @app_commands.describe(
@@ -64,9 +92,65 @@ async def currency(interaction:discord.Integration, curr_code: str, quantity: fl
         curr_to="Kod waluty np. USD, GBP, na którą zmieniamy ",
         num="kwota"
     )
-async def currency(interaction:discord.Integration, curr_from:str, num:float, curr_to:str ):
-    curr_from = curr_from.upper()
-    curr_to = curr_to.upper()
+@app_commands.choices(curr_from=[
+    app_commands.Choice(name="USD", value="usd"),
+    app_commands.Choice(name="EUR", value="eur"),
+    app_commands.Choice(name="HKD", value="hkd"),
+    app_commands.Choice(name="CAD", value="cad"),
+    app_commands.Choice(name="NZD", value="nzd"),
+    app_commands.Choice(name="SGD", value="sgd"),
+    app_commands.Choice(name="AUD", value="aud"),
+    app_commands.Choice(name="CHF", value="chf"),
+    app_commands.Choice(name="GBP", value="gbp"),
+    app_commands.Choice(name="UAH", value="uah"),
+    app_commands.Choice(name="CZK", value="czk"),
+    app_commands.Choice(name="DKK", value="dkk"),
+    app_commands.Choice(name="NOK", value="nok"),
+    app_commands.Choice(name="SEK", value="sek"),
+    app_commands.Choice(name="RON", value="ron"),
+    app_commands.Choice(name="BGN", value="bgn"),
+    app_commands.Choice(name="TRY", value="try"),
+    app_commands.Choice(name="ILS", value="ils"),
+    app_commands.Choice(name="PHP", value="php"),
+    app_commands.Choice(name="MXN", value="mxn"),
+    app_commands.Choice(name="ZAR", value="zar"),
+    app_commands.Choice(name="BRL", value="brl"),
+    app_commands.Choice(name="MYR", value="myr"),
+    app_commands.Choice(name="CNY", value="cny"),
+    app_commands.Choice(name="XDR", value="xdr"),
+    
+], curr_to=[
+    app_commands.Choice(name="USD", value="usd"),
+    app_commands.Choice(name="EUR", value="eur"),
+    app_commands.Choice(name="HKD", value="hkd"),
+    app_commands.Choice(name="CAD", value="cad"),
+    app_commands.Choice(name="NZD", value="nzd"),
+    app_commands.Choice(name="SGD", value="sgd"),
+    app_commands.Choice(name="AUD", value="aud"),
+    app_commands.Choice(name="CHF", value="chf"),
+    app_commands.Choice(name="GBP", value="gbp"),
+    app_commands.Choice(name="UAH", value="uah"),
+    app_commands.Choice(name="CZK", value="czk"),
+    app_commands.Choice(name="DKK", value="dkk"),
+    app_commands.Choice(name="NOK", value="nok"),
+    app_commands.Choice(name="SEK", value="sek"),
+    app_commands.Choice(name="RON", value="ron"),
+    app_commands.Choice(name="BGN", value="bgn"),
+    app_commands.Choice(name="TRY", value="try"),
+    app_commands.Choice(name="ILS", value="ils"),
+    app_commands.Choice(name="PHP", value="php"),
+    app_commands.Choice(name="MXN", value="mxn"),
+    app_commands.Choice(name="ZAR", value="zar"),
+    app_commands.Choice(name="BRL", value="brl"),
+    app_commands.Choice(name="MYR", value="myr"),
+    app_commands.Choice(name="CNY", value="cny"),
+    app_commands.Choice(name="XDR", value="xdr"),
+
+])
+
+async def zamiana(interaction:discord.Integration, curr_from: app_commands.Choice[str], num:float, curr_to:app_commands.Choice[str] ):
+    curr_from = curr_from.value.upper()
+    curr_to = curr_to.value.upper()
 
     url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/today/"
     url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/2012-01-01/2012-01-31/?format=json"
