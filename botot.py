@@ -67,6 +67,7 @@ async def help(interaction:discord.Integration):
     embed.add_field(name="Ekwipunek", value="**/pokazeq** - Pokazuje ekwipunek wybranego gracza\n **/modyfikujeq** - Modyfikuje ekwipunek\n **/przedmiot** - Pokazuje informacje o wybranym przedmiocie", inline=False)
     embed.add_field(name="Kalkulator", value="**/dodaj** - Dodaje do siebie dwie liczby\n **/odejmij** - Odejmuje jedną liczbę od drugiej\n **/pomnoz** - Mnoży przez siebie dwie liczby\n **/podziel** - Dzieli jedną liczbę przez drugą\n **/pierwiastek** - Pierwiastkuje podaną liczbę", inline=False)
     embed.add_field(name="Waluty", value="**/waluta** - Sprawdza obecny kurs wybranej waluty\n **/zamiana** - Zamienia wybraną walutę na dowolną inną", inline=False)
+    embed.add_field(name="Ligo Lego", value="**/build** - Pokazuje build wybranego bohatera\n **/losujbohatera** - Losuje bohatera", inline=False)
     
     
     await interaction.response.send_message(embed=embed)
