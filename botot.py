@@ -795,8 +795,8 @@ async def pomnoz(interaction: discord.Integration, czynnik_1: float, czynnik_2: 
     res = czynnik_1 * czynnik_2
     await interaction.response.send_message(f"{czynnik_1} • {czynnik_2} = {res}")
 
-@bot.tree.command(name="build")
-@discord.app_commands.describe(champion_name='_', lane='_')
+@bot.tree.command(name="build", description="Wyświetla poradnik dla wybranego bohatera")
+@discord.app_commands.describe(champion_name='Nazwa wybranego bohatera', lane='Linia wybrana do poradnika')
 async def build(ctx, champion_name:str, lane:str):
     champion_name = champion_name.capitalize()
     lane = lane.lower()
@@ -816,107 +816,12 @@ async def build(ctx, champion_name:str, lane:str):
     else:
         await ctx.response.send_message('Nie znaleziono danych dla podanego bohatera.')
 
-@bot.tree.command(name="losujbohatera")
+@bot.tree.command(name="losujbohatera", description="Losuje jednego z bohaterów")
 async def losujbohatera(ctx):
     available_champions = list(champions_specs.keys())
     random_champion = random.choice(available_champions)
     
     await ctx.response.send_message(f'Wylosowany bohater: {random_champion}')
     
-    def check(message):
-        return message.author == ctx.author and message.channel == ctx.channel
-    
-    await ctx.response.send_message('Proszę wybierz linię (np. top, jungle, mid, bot, support):')
-    try:
-        lane_message = await bot.wait_for('message', check=check, timeout=60)
-        lane = lane_message.content.lower()
-        
-        if lane in champions_specs[random_champion]:
-            mobafire_url = champions_specs[random_champion][lane]
-            await ctx.response.send_message(f'Build dla {random_champion} na linii {lane}:\n{mobafire_url}')
-        else:
-            await ctx.response.send_message('Nie znaleziono danych dla podanej linii.')
-    except TimeoutError:
-        await ctx.response.send_message('Czas na wybór linii minął.')
-
-@bot.command()
-async def losujlinie(ctx):
-    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
-    random_lane = random.choice(available_lanes)
-    
-    await ctx.response.send_message(f'Wylosowana linia: {random_lane}')
-    
-    def check(message):
-        return message.author == ctx.author and message.channel == ctx.channel
-    
-    await ctx.response.send_message('Proszę wybierz postać spośród dostępnych:')
-    try:
-        champion_message = await bot.wait_for('message', check=check, timeout=60)
-        champion_name = champion_message.content.capitalize()
-        
-        if champion_name in champions_specs:
-            if random_lane in champions_specs[champion_name]:
-                mobafire_url = champions_specs[champion_name][random_lane]
-                await ctx.response.send_message(f'Build dla {champion_name} na linii {random_lane}:\n{mobafire_url}')
-            else:
-                await ctx.response.send_message(f'Wybrana postać ({champion_name}) nie jest dostępna na wylosowanej linii ({random_lane}).')
-        else:
-            await ctx.response.send_message(f'Nie znaleziono danych dla wybranej postaci: {champion_name}.')
-    except TimeoutError:
-        await ctx.response.send_message('Czas na wybór postaci minął.')
-
-@bot.command()
-async def losuj4fun(ctx):
-    available_champions = list(champions_specs.keys())
-    random_champion = random.choice(available_champions)
-    
-    await ctx.response.send_message(f'Wylosowany bohater: {random_champion}')
-    
-    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
-    available_lanes.remove(random.choice(list(champions_specs[random_champion].keys())))
-    random_lane = random.choice(available_lanes)
-    
-    await ctx.response.send_message(f'Wylosowana linia (nieprzeznaczona dla {random_champion}): {random_lane}')
-    
-    available_champions_specs = []
-    for champ_name, champ_champions_specs in champions_specs.items():
-        if champ_name != random_champion:
-            available_champions_specs.extend(champ_champions_specs.values())
-    random_build = random.choice(available_champions_specs)
-    
-    await ctx.response.send_message(f'Wylosowany build (nieprzeznaczony dla {random_champion}): {random_build}')
-
-@bot.command()
-async def ulubieni(ctx, champion_name, lane, build_link):
-    champion_name = champion_name.capitalize()
-    lane = lane.lower()
-    
-    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
-    if lane not in available_lanes:
-        await ctx.response.send_message(f'Podano nieprawidłową linię. Dostępne linie: {", ".join(available_lanes)}.')
-        return
-    
-    if champion_name in champions_specs:
-        if lane in champions_specs[champion_name]:
-            ulubieni[ctx.author.id] = ulubieni.get(ctx.author.id, {})
-            ulubieni[ctx.author.id][champion_name] = {'lane': lane, 'build_link': build_link}
-            await ctx.response.send_message(f'Dodano bohatera {champion_name} na linię {lane} z buildem: {build_link} do ulubionych.')
-        else:
-            await ctx.response.send_message('Nie znaleziono danych dla podanej linii.')
-    else:
-        await ctx.response.send_message('Nie znaleziono danych dla podanego bohatera.')
-
-@bot.command()
-async def ulubienilista(ctx):
-    if ctx.author.id in ulubieni:
-        favorite_champions = ulubieni[ctx.author.id]
-        if favorite_champions:
-            await ctx.response.send_message('Twoi ulubieni bohaterowie:')
-            for champ, data in favorite_champions.items():
-                await ctx.response.send_message(f'Bohater: {champ}, Linia: {data["lane"]}, Build: {data["build_link"]}')
-        else:
-            await ctx.response.send_message('Nie masz ulubionych bohaterów.')
-    else:
-        await ctx.response.send_message('Nie masz ulubionych bohaterów.')
 
 bot.run(TOKEN)
