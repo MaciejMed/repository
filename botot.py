@@ -1,21 +1,51 @@
-from typing import Optional
 import asyncio
-import discord
+import linecache
+import math
 import random
+import string
+from random import choices
+from typing import List, Optional
+from urllib.request import urlopen
+
+import discord
 from discord import app_commands
 from discord.ext import commands
-from config import TOKEN
-from urllib.request import urlopen
-from random import choices
-import linecache
-from typing import List
-import math
 import requests
-import string
+
+from champions import champions_specs
+from config import TOKEN
+
 bot = commands.Bot(command_prefix="/", intents=discord.Intents.all())
 
 tymczasowe_ankiety = {}
 supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
+curr_helper = [
+    app_commands.Choice(name="USD", value="usd"),
+    app_commands.Choice(name="EUR", value="eur"),
+    app_commands.Choice(name="HKD", value="hkd"),
+    app_commands.Choice(name="CAD", value="cad"),
+    app_commands.Choice(name="NZD", value="nzd"),
+    app_commands.Choice(name="SGD", value="sgd"),
+    app_commands.Choice(name="AUD", value="aud"),
+    app_commands.Choice(name="CHF", value="chf"),
+    app_commands.Choice(name="GBP", value="gbp"),
+    app_commands.Choice(name="UAH", value="uah"),
+    app_commands.Choice(name="CZK", value="czk"),
+    app_commands.Choice(name="DKK", value="dkk"),
+    app_commands.Choice(name="NOK", value="nok"),
+    app_commands.Choice(name="SEK", value="sek"),
+    app_commands.Choice(name="RON", value="ron"),
+    app_commands.Choice(name="BGN", value="bgn"),
+    app_commands.Choice(name="TRY", value="try"),
+    app_commands.Choice(name="ILS", value="ils"),
+    app_commands.Choice(name="PHP", value="php"),
+    app_commands.Choice(name="MXN", value="mxn"),
+    app_commands.Choice(name="ZAR", value="zar"),
+    app_commands.Choice(name="BRL", value="brl"),
+    app_commands.Choice(name="MYR", value="myr"),
+    app_commands.Choice(name="CNY", value="cny"),
+    app_commands.Choice(name="XDR", value="xdr")
+]
 linecache.clearcache()
 @bot.event
 async def on_ready():
@@ -52,44 +82,13 @@ async def generujhaslo(interaction:discord.Integration, dlugosc:int=12):
     haslo = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=dlugosc))
     await interaction.response.send_message(f'Oto wygenerowane hasło: `{haslo}`', ephemeral=True)
 
-
-
-#supported = ["USD", "AUD", "HKD", "CAD", "NZD", "SGD", "EUR", "CHF", "GBP", "UAH", "CZK", "DKK", "NOK", "SEK", "RON", "BGN", "TRY", "ILS", "PHP", "MXN", "ZAR", "BRL", "MYR", "CNY", "XDR"]
-
 @bot.tree.command(name="waluta", description="Sprawdź kurs")
 @app_commands.describe(curr_code="Kod waluty np. USD, GBP", quantity="kwota w złotówkach do wymiany")
-@app_commands.choices(curr_code=[
-    app_commands.Choice(name="USD", value="usd"),
-    app_commands.Choice(name="EUR", value="eur"),
-    app_commands.Choice(name="HKD", value="hkd"),
-    app_commands.Choice(name="CAD", value="cad"),
-    app_commands.Choice(name="NZD", value="nzd"),
-    app_commands.Choice(name="SGD", value="sgd"),
-    app_commands.Choice(name="AUD", value="aud"),
-    app_commands.Choice(name="CHF", value="chf"),
-    app_commands.Choice(name="GBP", value="gbp"),
-    app_commands.Choice(name="UAH", value="uah"),
-    app_commands.Choice(name="CZK", value="czk"),
-    app_commands.Choice(name="DKK", value="dkk"),
-    app_commands.Choice(name="NOK", value="nok"),
-    app_commands.Choice(name="SEK", value="sek"),
-    app_commands.Choice(name="RON", value="ron"),
-    app_commands.Choice(name="BGN", value="bgn"),
-    app_commands.Choice(name="TRY", value="try"),
-    app_commands.Choice(name="ILS", value="ils"),
-    app_commands.Choice(name="PHP", value="php"),
-    app_commands.Choice(name="MXN", value="mxn"),
-    app_commands.Choice(name="ZAR", value="zar"),
-    app_commands.Choice(name="BRL", value="brl"),
-    app_commands.Choice(name="MYR", value="myr"),
-    app_commands.Choice(name="CNY", value="cny"),
-    app_commands.Choice(name="XDR", value="xdr"),
-    
-])
+@app_commands.choices(curr_code=curr_helper)
 async def waluta(interaction:discord.Integration, curr_code: app_commands.Choice[str], quantity: float):
     curr_code = curr_code.value.upper()
-    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/today/"
-    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/2012-01-01/2012-01-31/?format=json"
+    # url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/today/?format=json"
+    url = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_code}/2023-09-01/?format=json"
 
     if curr_code not in supported:
         await interaction.response.send_message(f"Waluta {curr_code} nie jest obsługiwana. Wybierz jedną z {', '.join(supported)}")
@@ -98,7 +97,7 @@ async def waluta(interaction:discord.Integration, curr_code: app_commands.Choice
     table = res.json()
 
     result = quantity * table.get("rates")[0].get("mid")
-    await interaction.response.send_message(f"{quantity} PLN to {result} {curr_code.upper()}")
+    await interaction.response.send_message(f"{quantity:.2f} PLN to {result:.2f} {curr_code.upper()}")
 
 @bot.tree.command(name="zamiana", description="Zamień dowolną kwotę z wybranej waluty na inną.")
 @app_commands.describe(
@@ -106,71 +105,16 @@ async def waluta(interaction:discord.Integration, curr_code: app_commands.Choice
         curr_to="Kod waluty np. USD, GBP, na którą zmieniamy ",
         num="kwota"
     )
-@app_commands.choices(curr_from=[
-    app_commands.Choice(name="USD", value="usd"),
-    app_commands.Choice(name="EUR", value="eur"),
-    app_commands.Choice(name="HKD", value="hkd"),
-    app_commands.Choice(name="CAD", value="cad"),
-    app_commands.Choice(name="NZD", value="nzd"),
-    app_commands.Choice(name="SGD", value="sgd"),
-    app_commands.Choice(name="AUD", value="aud"),
-    app_commands.Choice(name="CHF", value="chf"),
-    app_commands.Choice(name="GBP", value="gbp"),
-    app_commands.Choice(name="UAH", value="uah"),
-    app_commands.Choice(name="CZK", value="czk"),
-    app_commands.Choice(name="DKK", value="dkk"),
-    app_commands.Choice(name="NOK", value="nok"),
-    app_commands.Choice(name="SEK", value="sek"),
-    app_commands.Choice(name="RON", value="ron"),
-    app_commands.Choice(name="BGN", value="bgn"),
-    app_commands.Choice(name="TRY", value="try"),
-    app_commands.Choice(name="ILS", value="ils"),
-    app_commands.Choice(name="PHP", value="php"),
-    app_commands.Choice(name="MXN", value="mxn"),
-    app_commands.Choice(name="ZAR", value="zar"),
-    app_commands.Choice(name="BRL", value="brl"),
-    app_commands.Choice(name="MYR", value="myr"),
-    app_commands.Choice(name="CNY", value="cny"),
-    app_commands.Choice(name="XDR", value="xdr"),
-    
-], curr_to=[
-    app_commands.Choice(name="USD", value="usd"),
-    app_commands.Choice(name="EUR", value="eur"),
-    app_commands.Choice(name="HKD", value="hkd"),
-    app_commands.Choice(name="CAD", value="cad"),
-    app_commands.Choice(name="NZD", value="nzd"),
-    app_commands.Choice(name="SGD", value="sgd"),
-    app_commands.Choice(name="AUD", value="aud"),
-    app_commands.Choice(name="CHF", value="chf"),
-    app_commands.Choice(name="GBP", value="gbp"),
-    app_commands.Choice(name="UAH", value="uah"),
-    app_commands.Choice(name="CZK", value="czk"),
-    app_commands.Choice(name="DKK", value="dkk"),
-    app_commands.Choice(name="NOK", value="nok"),
-    app_commands.Choice(name="SEK", value="sek"),
-    app_commands.Choice(name="RON", value="ron"),
-    app_commands.Choice(name="BGN", value="bgn"),
-    app_commands.Choice(name="TRY", value="try"),
-    app_commands.Choice(name="ILS", value="ils"),
-    app_commands.Choice(name="PHP", value="php"),
-    app_commands.Choice(name="MXN", value="mxn"),
-    app_commands.Choice(name="ZAR", value="zar"),
-    app_commands.Choice(name="BRL", value="brl"),
-    app_commands.Choice(name="MYR", value="myr"),
-    app_commands.Choice(name="CNY", value="cny"),
-    app_commands.Choice(name="XDR", value="xdr"),
-
-])
-
+@app_commands.choices(curr_from=curr_helper, curr_to=curr_helper)
 async def zamiana(interaction:discord.Integration, curr_from: app_commands.Choice[str], num:float, curr_to:app_commands.Choice[str] ):
     curr_from = curr_from.value.upper()
     curr_to = curr_to.value.upper()
 
-    url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/today/"
-    url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/2012-01-01/2012-01-31/?format=json"
+    # url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/today/"
+    url1 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_from}/2023-09-01//?format=json"
 
-    url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/today/"
-    url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/2012-01-01/2012-01-31/?format=json"
+    # url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/today/"
+    url2 = f"https://api.nbp.pl/api/exchangerates/rates/a/{curr_to}/2023-09-01//?format=json"
 
 
 
@@ -849,5 +793,129 @@ async def pierwiastek(interaction: discord.Integration, liczba: float):
 async def pomnoz(interaction: discord.Integration, czynnik_1: float, czynnik_2: float ):
     res = czynnik_1 * czynnik_2
     await interaction.response.send_message(f"{czynnik_1} • {czynnik_2} = {res}")
+
+@bot.tree.command(name="build")
+@discord.app_commands.describe(champion_name='_', lane='_')
+async def build(ctx, champion_name:str, lane:str):
+    champion_name = champion_name.capitalize()
+    lane = lane.lower()
+    
+    # Sprawdzenie, czy linia jest prawidłowa
+    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
+    if lane not in available_lanes:
+        await ctx.response.send_message(f'Podano nieprawidłową linię. Dostępne linie: {", ".join(available_lanes)}.')
+        return
+    
+    if champion_name in champions_specs:
+        if lane in champions_specs[champion_name]:
+            mobafire_url = champions_specs[champion_name][lane]
+            await ctx.response.send_message(f'Build dla {champion_name} na linii {lane}:\n{mobafire_url}')
+        else:
+            await ctx.response.send_message('Nie znaleziono danych dla podanej linii.')
+    else:
+        await ctx.response.send_message('Nie znaleziono danych dla podanego bohatera.')
+
+@bot.tree.command(name="losujbohatera")
+async def losujbohatera(ctx):
+    available_champions = list(champions_specs.keys())
+    random_champion = random.choice(available_champions)
+    
+    await ctx.response.send_message(f'Wylosowany bohater: {random_champion}')
+    
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+    
+    await ctx.response.send_message('Proszę wybierz linię (np. top, jungle, mid, bot, support):')
+    try:
+        lane_message = await bot.wait_for('message', check=check, timeout=60)
+        lane = lane_message.content.lower()
+        
+        if lane in champions_specs[random_champion]:
+            mobafire_url = champions_specs[random_champion][lane]
+            await ctx.response.send_message(f'Build dla {random_champion} na linii {lane}:\n{mobafire_url}')
+        else:
+            await ctx.response.send_message('Nie znaleziono danych dla podanej linii.')
+    except TimeoutError:
+        await ctx.response.send_message('Czas na wybór linii minął.')
+
+@bot.command()
+async def losujlinie(ctx):
+    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
+    random_lane = random.choice(available_lanes)
+    
+    await ctx.response.send_message(f'Wylosowana linia: {random_lane}')
+    
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+    
+    await ctx.response.send_message('Proszę wybierz postać spośród dostępnych:')
+    try:
+        champion_message = await bot.wait_for('message', check=check, timeout=60)
+        champion_name = champion_message.content.capitalize()
+        
+        if champion_name in champions_specs:
+            if random_lane in champions_specs[champion_name]:
+                mobafire_url = champions_specs[champion_name][random_lane]
+                await ctx.response.send_message(f'Build dla {champion_name} na linii {random_lane}:\n{mobafire_url}')
+            else:
+                await ctx.response.send_message(f'Wybrana postać ({champion_name}) nie jest dostępna na wylosowanej linii ({random_lane}).')
+        else:
+            await ctx.response.send_message(f'Nie znaleziono danych dla wybranej postaci: {champion_name}.')
+    except TimeoutError:
+        await ctx.response.send_message('Czas na wybór postaci minął.')
+
+@bot.command()
+async def losuj4fun(ctx):
+    available_champions = list(champions_specs.keys())
+    random_champion = random.choice(available_champions)
+    
+    await ctx.response.send_message(f'Wylosowany bohater: {random_champion}')
+    
+    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
+    available_lanes.remove(random.choice(list(champions_specs[random_champion].keys())))
+    random_lane = random.choice(available_lanes)
+    
+    await ctx.response.send_message(f'Wylosowana linia (nieprzeznaczona dla {random_champion}): {random_lane}')
+    
+    available_champions_specs = []
+    for champ_name, champ_champions_specs in champions_specs.items():
+        if champ_name != random_champion:
+            available_champions_specs.extend(champ_champions_specs.values())
+    random_build = random.choice(available_champions_specs)
+    
+    await ctx.response.send_message(f'Wylosowany build (nieprzeznaczony dla {random_champion}): {random_build}')
+
+@bot.command()
+async def ulubieni(ctx, champion_name, lane, build_link):
+    champion_name = champion_name.capitalize()
+    lane = lane.lower()
+    
+    available_lanes = ['top', 'jungle', 'mid', 'bot', 'support']
+    if lane not in available_lanes:
+        await ctx.response.send_message(f'Podano nieprawidłową linię. Dostępne linie: {", ".join(available_lanes)}.')
+        return
+    
+    if champion_name in champions_specs:
+        if lane in champions_specs[champion_name]:
+            ulubieni[ctx.author.id] = ulubieni.get(ctx.author.id, {})
+            ulubieni[ctx.author.id][champion_name] = {'lane': lane, 'build_link': build_link}
+            await ctx.response.send_message(f'Dodano bohatera {champion_name} na linię {lane} z buildem: {build_link} do ulubionych.')
+        else:
+            await ctx.response.send_message('Nie znaleziono danych dla podanej linii.')
+    else:
+        await ctx.response.send_message('Nie znaleziono danych dla podanego bohatera.')
+
+@bot.command()
+async def ulubienilista(ctx):
+    if ctx.author.id in ulubieni:
+        favorite_champions = ulubieni[ctx.author.id]
+        if favorite_champions:
+            await ctx.response.send_message('Twoi ulubieni bohaterowie:')
+            for champ, data in favorite_champions.items():
+                await ctx.response.send_message(f'Bohater: {champ}, Linia: {data["lane"]}, Build: {data["build_link"]}')
+        else:
+            await ctx.response.send_message('Nie masz ulubionych bohaterów.')
+    else:
+        await ctx.response.send_message('Nie masz ulubionych bohaterów.')
 
 bot.run(TOKEN)
