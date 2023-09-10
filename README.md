@@ -1,4 +1,4 @@
-# <nazwa_bota>
+# Tsyal
 
 ## Instalacja
 
