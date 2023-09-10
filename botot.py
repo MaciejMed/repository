@@ -52,7 +52,7 @@ async def on_ready():
     print("bot gud")
     try:
         synced=await bot.tree.sync()
-        print(f"{len(synced)} komend powinno działać")
+        print(f"powinno działać")
     except Exception as e:
         print(e)
 
