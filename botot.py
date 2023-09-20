@@ -419,26 +419,26 @@ async def rzutpro(interaction: discord.Integration, parametry: str):
 ])
 async def namegen(interaction: discord.Integration, rasa: app_commands.Choice[str]):
     if rasa.value == "czlowiek":
-        with open(r"D:\tsyal\names.txt", "r") as fp:
+        with open(r".\names.txt", "r") as fp:
             for count, line in enumerate(fp):
                 pass
-        f=open(r"D:\tsyal\names.txt","r")
+        f=open(r".\names.txt","r")
         for x in range(random.randint(1,count+1)):
             name=f.readline()
         await interaction.response.send_message(name)
     elif rasa.value == "elf":
-        with open(r"D:\tsyal\elves.txt", "r") as fp:
+        with open(r".\elves.txt", "r") as fp:
             for count, line in enumerate(fp):
                 pass
-        f=open(r"D:\tsyal\elves.txt","r")
+        f=open(r".\elves.txt","r")
         for x in range(random.randint(1,count+1)):
             name=f.readline()
         await interaction.response.send_message(name)
     elif rasa.value == "krasnolud":
-        with open(r"D:\tsyal\dwarves.txt", "r") as fp:
+        with open(r".\dwarves.txt", "r") as fp:
             for count, line in enumerate(fp):
                 pass
-        f=open(r"D:\tsyal\dwarves.txt","r")
+        f=open(r".\dwarves.txt","r")
         for x in range(random.randint(1,count+1)):
             name=f.readline()
         await interaction.response.send_message(name)
@@ -454,11 +454,11 @@ async def namegen(interaction: discord.Integration, rasa: app_commands.Choice[st
 ])
 async def addname(interaction: discord.Integration, name: str, rasa: app_commands.Choice[str]):
     if rasa.value == "czlowiek":
-        f = open(r"D:\tsyal\names.txt", "a")
+        f = open(r".\names.txt", "a")
     elif rasa.value == "elf":
-        f = open(r"D:\tsyal\elves.txt", "a")
+        f = open(r".\elves.txt", "a")
     elif rasa.value == "krasnolud":
-        f = open(r"D:\tsyal\dwarves.txt", "a")
+        f = open(r".\dwarves.txt", "a")
     else:
         await interaction.response.send_message(f"Proszę wybrać dostępną opcję")
     f.write("\n")
@@ -475,9 +475,9 @@ async def addname(interaction: discord.Integration, name: str, rasa: app_command
 ])
 async def remname(interaction: discord.Integration, name: str, rasa: app_commands.Choice[str]):
     if rasa.value == "czlowiek":
-        with open(r"D:\tsyal\names.txt", "r") as fp:
+        with open(r".\names.txt", "r") as fp:
             lines=fp.readlines()
-        with open(r"D:\tsyal\names.txt", "w") as fp:
+        with open(r".\names.txt", "w") as fp:
             for line in lines:
                 if line.strip("\n") != name:
                     fp.write(line)
@@ -485,9 +485,9 @@ async def remname(interaction: discord.Integration, name: str, rasa: app_command
                     line.strip
         await interaction.response.send_message(f"Imię **{name}** zostało usunięte z listy imion ludzi.")
     elif rasa.value == "elf":
-        with open(r"D:\tsyal\elves.txt", "r") as fp:
+        with open(r".\elves.txt", "r") as fp:
             lines=fp.readlines()
-        with open(r"D:\tsyal\elves.txt", "w") as fp:
+        with open(r".\elves.txt", "w") as fp:
             for line in lines:
                 if line.strip("\n") != name:
                     fp.write(line)
@@ -495,9 +495,9 @@ async def remname(interaction: discord.Integration, name: str, rasa: app_command
                     line.strip
         await interaction.response.send_message(f"Imię **{name}** zostało usunięte z listy imion elfów.")
     elif rasa.value == "krasnolud":
-        with open(r"D:\tsyal\dwarves.txt", "r") as fp:
+        with open(r".\dwarves.txt", "r") as fp:
             lines=fp.readlines()
-        with open(r"D:\tsyal\dwarves.txt", "w") as fp:
+        with open(r".\dwarves.txt", "w") as fp:
             for line in lines:
                 if line.strip("\n") != name:
                     fp.write(line)
@@ -516,15 +516,15 @@ async def remname(interaction: discord.Integration, name: str, rasa: app_command
     ])
 async def namelist(interaction: discord.Integration, rasa: app_commands.Choice[str]):
     if rasa.value == "czlowiek":
-        with open(r"D:\tsyal\names.txt", "r") as f:
+        with open(r".\names.txt", "r") as f:
             lines = [line for line in f]
         await interaction.response.send_message(' '.join(lines))
     elif rasa.value == "elf":
-        with open(r"D:\tsyal\elves.txt", "r") as f:
+        with open(r".\elves.txt", "r") as f:
             lines = [line for line in f]
         await interaction.response.send_message(' '.join(lines))
     elif rasa.value == "krasnolud":
-        with open(r"D:\tsyal\dwarves.txt", "r") as f:
+        with open(r".\dwarves.txt", "r") as f:
             lines = [line for line in f]
         await interaction.response.send_message(' '.join(lines))
     else:
