@@ -7,8 +7,9 @@
 
 ## Opis
 Aby uruchomić bota należy kolejno:
- - Dołączyć na serwer testowy na discordzie poprzez link: https://discord.gg/EwjWv7vRA6.
+ - Wykonać kroki z filmu https://youtu.be/Oy5HGvrxM4o?si=vIz3_oEU9LW_RZ8e w momentach 1:11-1:45
  - Następnie umieścić wszystkie pliki w jednym folderze
+ - Wkleić swój token do pliku config.py
  - Otworzyć folder w powershellu
  - `python ./botot.py`
  - Gdy bot będzie online użyć komendy `/help` w czacie
